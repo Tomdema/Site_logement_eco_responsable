@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="home-container position-relative">
+    <header class="text-center mb-4">
+        <h1>Bienvenue dans votre Maison Éco-Responsable</h1>
+        <p class="subtitle">Gérez votre logement connecté en toute simplicité.</p>
+    </header>
+
+    <!-- Résumé des fonctionnalités principales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center p-3">
+                <i class="fas fa-bolt fa-2x text-warning mb-2"></i>
+                <h5>Électricité (mois en cours)</h5>
+                <p><strong>{{ conso_mois_en_cours }} kWh</strong></p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center p-3">
+                <i class="fas fa-tint fa-2x text-info mb-2"></i>
+                <h5>Eau (mois en cours)</h5>
+                <p><strong>{{ eau_mois_en_cours }} litres</strong></p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center p-3">
+                <i class="fas fa-thermometer-half fa-2x text-danger mb-2"></i>
+                <h5>Capteurs Actifs</h5>
+                <p><strong>{{ nb_capteurs_actifs }}</strong></p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center p-3">
+                <i class="fas fa-file-invoice-dollar fa-2x text-primary mb-2"></i>
+                <h5>Factures Totales</h5>
+                <p><strong>{{ total_factures }} €</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boutons épurés avec motifs écologiques -->
+    <div class="row text-center">
+        <div class="col-md-3 mb-4">
+            <a href="{{ url_for('consommation') }}" class="btn eco-btn">
+                <i class="fas fa-chart-line fa-3x"></i>
+                <p class="mt-2">Consommation</p>
+            </a>
+        </div>
+        <div class="col-md-3 mb-4">
+            <a href="{{ url_for('capteurs') }}" class="btn eco-btn">
+                <i class="fas fa-microchip fa-3x"></i>
+                <p class="mt-2">Capteurs</p>
+            </a>
+        </div>
+        <div class="col-md-3 mb-4">
+            <a href="{{ url_for('configuration') }}" class="btn eco-btn">
+                <i class="fas fa-cog fa-3x"></i>
+                <p class="mt-2">Configuration</p>
+            </a>
+        </div>
+        <div class="col-md-3 mb-4">
+            <a href="{{ url_for('facturation') }}" class="btn eco-btn">
+                <i class="fas fa-file-invoice-dollar fa-3x"></i>
+                <p class="mt-2">Facturation</p>
+            </a>
+        </div>
+    </div>
+
+    <!-- Informations météo -->
+    <div class="weather-info text-end mt-4" aria-live="polite">
+        <h2>Conditions Météo</h2>
+        {% if weather_data %}
+            <p><strong>Température :</strong> {{ weather_data['main']['temp'] }}°C</p>
+            <p><strong>Conditions :</strong> {{ weather_data['weather'][0]['description'] }}</p>
+            <p><strong>Ville :</strong> {{ weather_data['name'] }}</p>
+        {% else %}
+            <div class="spinner-border text-success" role="status">
+                <span class="visually-hidden">Chargement des données météo...</span>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

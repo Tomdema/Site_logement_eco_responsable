@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="configuration-container">
+    <header class="text-center mb-4">
+        <h2>Configuration des Capteurs</h2>
+        <p class="subtitle">Ajoutez, activez, désactivez ou supprimez des capteurs pour personnaliser votre maison connectée.</p>
+    </header>
+
+    <!-- Formulaire pour ajouter un capteur -->
+    <div class="add-capteur mt-4">
+        <h3>Ajouter un Nouveau Capteur</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="add">
+            <div class="form-group mb-3">
+                <label for="type_id" class="form-label">Type de Capteur</label>
+                <select class="form-control" id="type_id" name="type_id" required>
+                    {% for type in types %}
+                        <option value="{{ type.id }}">{{ type.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="piece_id" class="form-label">Pièce</label>
+                <select class="form-control" id="piece_id" name="piece_id" required>
+                    {% for piece in pieces %}
+                        <option value="{{ piece.id }}">{{ piece.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="reference_commerciale" class="form-label">Référence Commerciale</label>
+                <input type="text" class="form-control" id="reference_commerciale" name="reference_commerciale" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="port_communication" class="form-label">Port de Communication</label>
+                <input type="text" class="form-control" id="port_communication" name="port_communication">
+            </div>
+            <button type="submit" class="btn btn-success mt-3">Ajouter</button>
+        </form>
+    </div>
+
+    <!-- Liste des capteurs existants -->
+    <div class="existing-capteurs mt-5">
+        <h3>Liste des Capteurs</h3>
+        <table class="table table-striped table-bordered">
+            <thead class="table-success">
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Pièce</th>
+                    <th>Référence</th>
+                    <th>Port</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for capteur in capteurs %}
+                <tr>
+                    <td>{{ capteur.id }}</td>
+                    <td>{{ capteur.type_nom }}</td> <!-- Affiche le nom du type -->
+                    <td>{{ capteur.piece_nom }}</td> <!-- Affiche le nom de la pièce -->
+                    <td>{{ capteur.reference_commerciale }}</td>
+                    <td>{{ capteur.port_communication or 'Inactif' }}</td>
+                    <td>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="activate">
+                            <input type="hidden" name="capteur_id" value="{{ capteur.id }}">
+                            <button type="submit" class="btn btn-primary btn-sm" {% if capteur.port_communication %}disabled{% endif %}>Activer</button>
+                        </form>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="deactivate">
+                            <input type="hidden" name="capteur_id" value="{{ capteur.id }}">
+                            <button type="submit" class="btn btn-warning btn-sm" {% if not capteur.port_communication %}disabled{% endif %}>Désactiver</button>
+                        </form>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="capteur_id" value="{{ capteur.id }}">
+                            <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                        </form>
+                        <a href="{{ url_for('visualiser_mesures', capteur_id=capteur.id) }}" class="btn btn-info btn-sm">Visualiser les mesures</a>
+                    </td>
+                    
+                    
+                    
+                </tr>
+                {% endfor %}
+            </tbody>
+            
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="consommation-container">
+    <header class="text-center mb-4">
+        <h2>Consommation Énergétique</h2>
+        <p class="subtitle">Visualisez les montants et consommations par type.</p>
+    </header>
+    
+    <form method="GET" class="mb-4 d-flex justify-content-center align-items-end row g-3">
+        <div class="col-auto">
+            <label for="date_debut" class="form-label">Date début</label>
+            <input type="date" class="form-control" id="date_debut" name="date_debut" value="{{ date_debut }}">
+        </div>
+        <div class="col-auto">
+            <label for="date_fin" class="form-label">Date fin</label>
+            <input type="date" class="form-control" id="date_fin" name="date_fin" value="{{ date_fin }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-success">Filtrer</button>
+        </div>
+    </form>
+
+    <div class="charts">
+        {% for type_conso, data in chart_data.items() %}
+        <div class="chart-container mb-5">
+            <h3>{{ type_conso }}</h3>
+            <canvas id="chart-{{ loop.index }}" width="800" height="400"></canvas>
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const ctx = document.getElementById('chart-{{ loop.index }}').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: {{ data.dates | tojson | safe }},
+                        datasets: [
+                            {
+                                label: 'Montant (€)',
+                                data: {{ data.montant | tojson | safe }},
+                                backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                            },
+                            {
+                                label: 'Consommation brute',
+                                data: {{ data.valeur_consommation | tojson | safe }},
+                                backgroundColor: 'rgba(153, 102, 255, 0.6)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: true }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Date' } },
+                            y: { title: { display: true, text: 'Valeur' } }
+                        }
+                    }
+                });
+            });
+        </script>
+        {% endfor %}
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

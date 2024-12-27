@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="configuration-container">
+    <header class="text-center mb-4">
+        <h2>Gestion des Factures</h2>
+        <p class="subtitle">Ajoutez de nouvelles factures et visualisez-les.</p>
+    </header>
+
+    <!-- Formulaire pour ajouter une facture -->
+    <div class="add-facture mt-4 mb-5">
+        <h3>Ajouter une Nouvelle Facture</h3>
+        <form method="POST">
+            <div class="form-group mb-3">
+                <label for="logement_id" class="form-label">Logement</label>
+                <select class="form-control" id="logement_id" name="logement_id" required>
+                    {% for lgmt in logements %}
+                        <option value="{{ lgmt.id }}">{{ lgmt.adresse }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="type" class="form-label">Type de Facture</label>
+                <select class="form-control" id="type" name="type" required>
+                    {% for t in types_facture %}
+                        <option value="{{ t }}">{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="montant" class="form-label">Montant (€)</label>
+                <input type="number" step="0.01" class="form-control" id="montant" name="montant" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="valeur_consommation" class="form-label">Valeur Consommation</label>
+                <input type="number" step="0.01" class="form-control" id="valeur_consommation" name="valeur_consommation" required>
+            </div>
+            <button type="submit" class="btn btn-success mt-3">Ajouter</button>
+        </form>
+    </div>
+
+    <!-- Liste des factures existantes -->
+    <div class="existing-factures mt-5">
+        <h3>Liste des Factures</h3>
+        <table class="table table-striped table-bordered">
+            <thead class="table-success">
+                <tr>
+                    <th>ID</th>
+                    <th>Logement</th>
+                    <th>Type</th>
+                    <th>Date</th>
+                    <th>Montant (€)</th>
+                    <th>Valeur Consommation</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for facture in factures %}
+                <tr>
+                    <td>{{ facture.id }}</td>
+                    <td>{{ facture.logement_id }}</td>
+                    <td>{{ facture.type }}</td>
+                    <td>{{ facture.date_facture }}</td>
+                    <td>{{ facture.montant }}</td>
+                    <td>{{ facture.valeur_consommation }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
