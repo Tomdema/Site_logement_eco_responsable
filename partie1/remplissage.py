@@ -1,4 +1,5 @@
-import sqlite3,random
+import sqlite3
+import random
 from datetime import datetime, timedelta
 
 # Chemin vers la base de données SQLite
@@ -8,11 +9,35 @@ conn = sqlite3.connect(database_path)
 conn.row_factory = sqlite3.Row
 c = conn.cursor()
 
-# Fonction pour générer une date aléatoire dans les 30 derniers jours
-def random_date():
+# Fonction pour générer une date aléatoire dans les trois derniers jours ouvrés du mois
+def random_workday_last_days():
     today = datetime.now()
-    random_days = random.randint(0, 30)
-    return today - timedelta(days=random_days)
+    year = today.year
+    month = today.month
+
+    # Passer au mois précédent si on est au début du mois
+    if today.day <= 3:
+        month -= 1
+        if month == 0:
+            month = 12
+            year -= 1
+
+    # Trouver le dernier jour du mois
+    if month == 12:
+        next_month = datetime(year + 1, 1, 1)
+    else:
+        next_month = datetime(year, month + 1, 1)
+
+    last_day_of_month = next_month - timedelta(days=1)
+    last_workdays = []
+
+    # Obtenir les trois derniers jours ouvrés
+    for i in range(3):
+        day = last_day_of_month - timedelta(days=i)
+        if day.weekday() < 5:  # 0-4 sont les jours de semaine (lundi-vendredi)
+            last_workdays.append(day)
+
+    return random.choice(last_workdays)
 
 # Remplissage de la table 'mesure'
 def insert_mesures():
@@ -21,7 +46,7 @@ def insert_mesures():
     for _ in range(10):  # Insertion de 10 mesures aléatoires
         capteur_id = random.choice(capteur_ids)
         valeur = round(random.uniform(10.0, 40.0), 2)  # Valeurs aléatoires entre 10.0 et 40.0
-        date_insertion = random_date()
+        date_insertion = random_workday_last_days()
         c.execute(
             "INSERT INTO mesure (capteur_id, valeur, date_insertion) VALUES (?, ?, ?)",
             (capteur_id, valeur, date_insertion)
@@ -38,7 +63,7 @@ def insert_factures():
         type_facture = random.choice(types_factures)
         montant = round(random.uniform(20.0, 200.0), 2)  # Montant aléatoire entre 20.0 et 200.0
         valeur_consommation = round(random.uniform(50.0, 300.0), 2)  # Consommation aléatoire
-        date_facture = random_date()
+        date_facture = random_workday_last_days()
         c.execute(
             "INSERT INTO facture (logement_id, type, montant, valeur_consommation, date_facture) VALUES (?, ?, ?, ?, ?)",
             (logement_id, type_facture, montant, valeur_consommation, date_facture)
