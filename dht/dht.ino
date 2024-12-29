@@ -3,9 +3,9 @@
 #include "DHT.h"
 
 // ⚙️ Configuration du réseau Wi-Fi
-#define SERVER_IP "172.24.13.179:5001" // IP locale du serveur Flask
-#define STASSID "Internet"
-#define STAPSK "Acc3ssGr@nted"
+#define SERVER_IP "192.168.1.119:5001" // IP locale du serveur Flask
+#define STASSID "Meteor-56CD710D"
+#define STAPSK "H6NXv6t9fPc6vKDf"
 
 // ⚙️ Configuration du capteur DHT
 #define DHTPIN 5        // Broche du capteur DHT22

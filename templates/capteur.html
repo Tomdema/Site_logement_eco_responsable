@@ -18,6 +18,7 @@
                     <th>Référence</th>
                     <th>État</th>
                     <th>Valeur Mesurée</th>
+                    <th>Unité</th>
                     <th>Date Dernière Mesure</th>
                     <th>Actions</th>
                 </tr>
@@ -37,6 +38,7 @@
                         {% endif %}
                     </td>
                     <td>{{ capteur.valeur or 'N/A' }}</td>
+                    <td>{{ capteur.unite_mesure or 'N/A' }}</td>
                     <td>{{ capteur.date_insertion or 'N/A' }}</td>
                     <td>
                         <button class="btn btn-info btn-sm" 
@@ -45,6 +47,9 @@
                                 data-capteur-id="{{ capteur.id }}">
                             Détails
                         </button>
+                        <a href="{{ url_for('visualiser_mesures', capteur_id=capteur.id) }}" class="btn btn-primary btn-sm">
+                            Visualiser les mesures
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}
@@ -98,6 +103,7 @@ detailsModal.addEventListener('show.bs.modal', function (event) {
                 <h5>Type : ${data.type}</h5>
                 <p>Pièce : ${data.piece}</p>
                 <p>Référence : ${data.reference_commerciale}</p>
+                <p>Unité : ${data.unite_mesure}</p>
                 <h6>Historique des mesures :</h6>
                 <ul>
                     ${data.mesures.map(m => `<li>${m.date_insertion} : ${m.valeur}</li>`).join('')}

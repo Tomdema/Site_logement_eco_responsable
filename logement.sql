@@ -29,7 +29,7 @@ CREATE TABLE mesure (id INTEGER PRIMARY KEY AUTOINCREMENT,capteur_id INTEGER,val
     date_insertion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,FOREIGN KEY (capteur_id) REFERENCES capteur_actionneur(id));
 
 -- Création de la table 'facture'
-CREATE TABLE facture (id INTEGER PRIMARY KEY AUTOINCREMENT,logement_id INTEGER, type TEXT,date_facture TIMESTAMP DEFAULT CURRENT_TIMESTAMP,montant REAL, valeur_consommation REAL, FOREIGN KEY (logement_id) REFERENCES logement(id));
+CREATE TABLE facture (id INTEGER PRIMARY KEY AUTOINCREMENT,logement_id INTEGER, type TEXT,date_facture TEXT NOT NULL,montant REAL, valeur_consommation REAL, FOREIGN KEY (logement_id) REFERENCES logement(id)); -- FormatDate: 'YYYY-MM'
 
 -- Question 4
 -- logement
@@ -38,32 +38,43 @@ INSERT INTO logement (adresse, telephone, adresse_ip) VALUES
 --Pieces 
 INSERT INTO piece (nom, logement_id, coordonnees) VALUES
 ('Salon' , 1, '0,0,0'),
-('chambre1', 1, '1,0,0'),
-('chambre2', 1, '1,1,0'),
+('Chambre1', 1, '1,0,0'),
+('Chambre2', 1, '1,1,0'),
+('Douche', 1, '1,0,1'),
 ('Cuisine', 1, '0,0,1');
 
 -- Question 5
 INSERT INTO type_capteur_actionneur (nom, unite_mesure, plage_precision) VALUES 
 ('Température', '°C', '-20 à 140'),
 ('Humidité', 'g/m^3', '0-500'),
-('Electricité', 'Kwh', '0-10000'),
-('Consommation_eau', 'litres', '0-10000');
+('Electricité', 'Kwh', '0-1000'),
+('Consommation_eau', 'litres', '0-20000');
 
 -- Question 6
 INSERT INTO capteur_actionneur (type_id, piece_id, reference_commerciale, port_communication) VALUES
-(1, 1, 'DHT11', 'COM1'),
-(1, 1, 'DHT22', 'COM1'),
-(3, 2, 'Somfy','COM5'),  -- Capteur de température
-(2, 2, 'DHT22', 'COM2');  -- Capteur de consommation électrique
+(1, 3, 'DHT11', 'COM1'),-- Capteur de température
+(1, 1, 'DHT22', 'COM1'), -- Capteur de température
+(3, 4, 'Somfy','COM5'),  -- Capteur de consommation électrique
+(2, 1, 'DHT22', 'COM2');  -- Capteur d'humidité
 
 -- Exemple d'insertion de mesures
 INSERT INTO mesure (capteur_id, valeur) VALUES
-(1, 27.5),  -- Température mesurée
-(1, 10.0), -- Consommation électrique en kWh
-(2, 32.5),  -- Température mesurée
-(2, 100.0); -- Consommation électrique en kWh
+(1, 27.5), -- Température mesurée par dht11
+(1, 20.0), -- Température mesurée par dht11
+(1, 22.5), -- Température mesurée par dht11
+(1, 18.5), -- Température mesurée par dht11
+(3, 5), -- Consommation électrique en kWh
+(3, 12), -- Consommation électrique en kWh
+(3, 10.5), -- Consommation électrique en kWh
+(3, 8); -- Consommation électrique en kWh
 -- Exemple d'insertion de factures
-INSERT INTO facture (logement_id, type, montant, valeur_consommation) VALUES
-(1, 'Electricité', 75.0, 150.0),
-(1, 'Consommation_eau', 30.0, 120.0);
+INSERT INTO facture (logement_id, type, date_facture, montant, valeur_consommation) VALUES
+(1, 'Electricité', '2024-09-27', 75.0, 298.0),
+(1, 'Electricité', '2024-10-27', 50.0, 199.0),
+(1, 'Electricité', '2024-11-27', 65.0, 257.7),
+(1, 'Electricité', '2024-12-27', 55.0, 219.0),
+(1, 'Consommation_eau', '2024-09-27', 45.0, 10465.0),
+(1, 'Consommation_eau', '2024-10-27', 55.0, 12791.0),
+(1, 'Consommation_eau', '2024-11-27', 40.0, 9302.0),
+(1, 'Consommation_eau', '2024-12-27', 48.0, 11163.0);
 

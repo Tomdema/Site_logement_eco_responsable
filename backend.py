@@ -145,7 +145,8 @@ def capteurs():
         SELECT ca.id, tc.nom AS type, p.nom AS piece, 
                ca.reference_commerciale, ca.port_communication,
                (SELECT m.valeur FROM mesure m WHERE m.capteur_id = ca.id ORDER BY m.date_insertion DESC LIMIT 1) AS valeur,
-               (SELECT m.date_insertion FROM mesure m WHERE m.capteur_id = ca.id ORDER BY m.date_insertion DESC LIMIT 1) AS date_insertion
+               (SELECT m.date_insertion FROM mesure m WHERE m.capteur_id = ca.id ORDER BY m.date_insertion DESC LIMIT 1) AS date_insertion,
+               tc.unite_mesure
         FROM capteur_actionneur ca
         JOIN type_capteur_actionneur tc ON ca.type_id = tc.id
         JOIN piece p ON ca.piece_id = p.id
@@ -223,13 +224,15 @@ def visualiser_mesures(capteur_id):
 
     # Récupération des données météo
     weather_data = get_weather()
-    temp_externe = weather_data['main']['temp'] if weather_data else 'N/A'
+    temp_externe = weather_data['main']['temp'] if weather_data else None
+    temp_externe_values = [temp_externe for _ in mesures] if temp_externe is not None else []
 
     # Passage des données au template
     return render_template('visualisation.html',
                            capteur=capteur,
                            mesures=mesures,
-                           temp_externe=temp_externe)
+                           temp_externe=temp_externe,
+                           temp_externe_values=temp_externe_values)
 
 # ✅ Route Configuration
 @app.route('/configuration', methods=['GET', 'POST'])
@@ -287,7 +290,6 @@ def configuration():
 def facturation():
     conn = get_db_connection()
     logements = conn.execute("SELECT * FROM logement").fetchall()
-    # Types de factures prédéfinis (adaptés à votre BD)
     types_facture = ["Electricité", "Consommation_eau"]
 
     if request.method == 'POST':
@@ -295,23 +297,62 @@ def facturation():
         type_facture = request.form['type']
         montant = request.form['montant']
         valeur_consommation = request.form['valeur_consommation']
+        date_facture = request.form['date_facture']
+
+        # Validation du format de la date
+        import re
+        if not re.match(r'^\d{4}-\d{2}-\d{2}$', date_facture):
+            flash("Format de date invalide. Utilisez 'YYYY-MM-DD'.", "danger")
+            return redirect(url_for('facturation'))
 
         conn.execute("""
-            INSERT INTO facture (logement_id, type, montant, valeur_consommation)
-            VALUES (?, ?, ?, ?)
-        """, (logement_id, type_facture, montant, valeur_consommation))
+            INSERT INTO facture (logement_id, type, montant, valeur_consommation, date_facture)
+            VALUES (?, ?, ?, ?, ?)
+        """, (logement_id, type_facture, montant, valeur_consommation, date_facture))
         conn.commit()
-        flash("Facture ajoutée avec succès !")
+        flash("Facture ajoutée avec succès !", "success")
         return redirect(url_for('facturation'))
 
-    factures = conn.execute("""
+    # Récupération des factures
+    date_debut = request.args.get('date_debut')
+    date_fin = request.args.get('date_fin')
+
+    query = """
         SELECT id, logement_id, type, date_facture, montant, valeur_consommation
         FROM facture
-        ORDER BY date_facture DESC
-    """).fetchall()
+        WHERE 1=1
+    """
+    params = []
+    if date_debut:
+        query += " AND date_facture >= ?"
+        params.append(date_debut)
+    if date_fin:
+        query += " AND date_facture <= ?"
+        params.append(date_fin)
+    query += " ORDER BY date_facture DESC"
+
+    factures = conn.execute(query, params).fetchall()
     conn.close()
 
-    return render_template('facturation.html', logements=logements, types_facture=types_facture, factures=factures)
+    return render_template('facturation.html',
+                           logements=logements,
+                           types_facture=types_facture,
+                           factures=factures,
+                           date_debut=date_debut,
+                           date_fin=date_fin)
+
+@app.route('/facturation/supprimer/<int:facture_id>', methods=['POST'])
+def supprimer_facture(facture_id):
+    conn = get_db_connection()
+    try:
+        conn.execute("DELETE FROM facture WHERE id = ?", (facture_id,))
+        conn.commit()
+        flash("Facture supprimée avec succès !", "success")
+    except sqlite3.Error as e:
+        flash(f"Erreur lors de la suppression : {e}", "danger")
+    finally:
+        conn.close()
+    return redirect(url_for('facturation'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001)
